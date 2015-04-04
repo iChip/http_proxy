@@ -131,7 +131,7 @@ if (strlen(fullMessage) > CBUFLEN){
   cb = (char *) realloc(cb, strlen(fullMessage));
 }
 strcpy(cb, fullMessage);
-// free(fullMessage);
+free(fullMessage);
 close(sockfd);
 
 

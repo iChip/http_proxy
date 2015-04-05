@@ -225,15 +225,15 @@ void* process_request(void* args)
       //  Write to socket and send to the client.
       int to_send = strlen(clientBuffer);
 
-      /* Catify */
-      memset(sed_cmd, 0, 512);
-      strcpy(sed_cmd, cat_expr_1);
-      strcat(sed_cmd, cat_expr_2);
-      strcat(sed_cmd, temp_file_path);
-      printf("Sed: %s\n",sed_cmd);
-      system(sed_cmd);
+      // /* Catify */
+      // memset(sed_cmd, 0, 512);
+      // strcpy(sed_cmd, cat_expr_1);
+      // strcat(sed_cmd, cat_expr_2);
+      // strcat(sed_cmd, temp_file_path);
+      // printf("Sed: %s\n",sed_cmd);
+      // system(sed_cmd);
 
-      sleep(1);
+      // sleep(1);
 
       read_cache(cache_file, client_socket);
 

@@ -90,17 +90,17 @@ strcat(fullMessage, header);
 if (chunkedFlag == 1){
   int chunkSize = chunkLen;
   while (chunkSize != 0){
-    // realloc handle code adapted from:
-    // http://stackoverflow.com/questions/27589846/dynamic-arrays-using-realloc-without-memory-leaks
-      void * tmp = (char *) realloc(fullMessage, (strlen(fullMessage)+chunkSize));
-      if (NULL == tmp)
-      {
-        printf("%s\n", "Out of memory.");
-      }
-      else
-      {
-        fullMessage = tmp;
-      }
+  // realloc handle code adapted from:
+  // http://stackoverflow.com/questions/27589846/dynamic-arrays-using-realloc-without-memory-leaks
+    void * tmp = (char *) realloc(fullMessage, (strlen(fullMessage)+chunkSize));
+    if (NULL == tmp)
+    {
+      printf("%s\n", "Out of memory.");
+    }
+    else
+    {
+      fullMessage = tmp;
+    }
 
     int received = 0;
 
@@ -139,7 +139,6 @@ else {
   char tempBuf[256];
   memset(tempBuf, 0, 256);
   while ((n = recv(sockfd, tempBuf, 255, 0) > 0)){
-      // printf("%s\n", tempBuf);
       strcat(fullMessage, tempBuf);
       rec += n;
       memset(tempBuf, 0, 256);

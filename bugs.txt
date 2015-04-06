@@ -1,7 +1,7 @@
 to fix:
 - should not cache 4/5xx
 - read and print reply code
-- handle connection issues with content-length type
+- handle connection issues with content-length type --> FIXED!
 
 to test:
 - what if host not reachable/ refuses connection (5xx codes)

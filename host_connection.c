@@ -74,12 +74,14 @@ int getHostContent(int sockfd, char *cb, int CBUFLEN){
 // Process header
 char header[MAXBUF] = { 0 };
 fillHeader(header, sockfd);
-int chunkLen = getChunkLen(sockfd);
-
+int chunkLen = 0;
 int chunkedFlag = checkChunked(header);
 int contentLength;
 if (chunkedFlag == 0){
   contentLength = getConLen(header);
+}
+else {
+  int chunkLen = getChunkLen(sockfd);
 }
 
 // Add header to message
@@ -138,12 +140,17 @@ else {
   int rec = 0;
   char tempBuf[256];
   memset(tempBuf, 0, 256);
-  while ((n = recv(sockfd, tempBuf, 255, 0) > 0)){
+
+  while ((n = recv(sockfd, tempBuf, 255, 0) > 0) || strlen(fullMessage)-strlen(header) < contentLength){
       strcat(fullMessage, tempBuf);
       rec += n;
       memset(tempBuf, 0, 256);
   }
 }
+printf("M - H: %d\n", strlen(fullMessage)-strlen(header));
+printf("CONLEN: %d\n", contentLength);
+
+
 if (strlen(fullMessage) > CBUFLEN){
   cb = (char *) realloc(cb, strlen(fullMessage));
 }

@@ -48,6 +48,23 @@ int getChunkLen(int sockfd){
   return (int)strtol(rawLen, NULL, 16);
 }
 
+void checkResponse(char headers[], int * respValid){
+  char * resp;
+  char * respEdit;
+  int code;
+  resp = strstr(headers, " ");
+  resp = resp+1;
+  strncpy(respEdit, resp, 3);
+  printf("HTTP Server Response Code: %s\n", respEdit);
+  code = (int)strtol(respEdit, NULL, 10);
+  if (code != 200){
+    respValid = 0;
+  }
+  else {
+    respValid = 1;
+  }
+}
+
 /* Get length of the message (non-chunked encoding) */
 int getConLen(char headers[]){
   char * len;
@@ -69,11 +86,14 @@ int checkChunked(char headers[]){
 }
 
 // Processes response from server
-int getHostContent(int sockfd, char *cb, int CBUFLEN){
+int getHostContent(int sockfd, char *cb, int CBUFLEN, int * respValid){
 
 // Process header
 char header[MAXBUF] = { 0 };
 fillHeader(header, sockfd);
+
+checkResponse(header, respValid);
+
 int chunkLen = 0;
 int chunkedFlag = checkChunked(header);
 int contentLength;
@@ -147,17 +167,11 @@ else {
       memset(tempBuf, 0, 256);
   }
 }
-printf("M - H: %d\n", strlen(fullMessage)-strlen(header));
-printf("CONLEN: %d\n", contentLength);
-
 
 if (strlen(fullMessage) > CBUFLEN){
   cb = (char *) realloc(cb, strlen(fullMessage));
 }
-strcpy(cb, fullMessage);
-free(fullMessage);
-close(sockfd);
-
-
-
-return 0; }
+  strcpy(cb, fullMessage);
+  free(fullMessage);
+  close(sockfd);
+}

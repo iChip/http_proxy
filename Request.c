@@ -217,7 +217,9 @@ void* process_request(void* args)
       /* Get Host Content From Server Response */
       char clientBuffer[CBUFLEN];
       memset(clientBuffer, 0, CBUFLEN);
-      getHostContent(sockfd, clientBuffer, CBUFLEN);
+
+      int respValid;
+      respValid = getHostContent(sockfd, clientBuffer, CBUFLEN);
 
       /* Write Retrieved Content to Cache File */
       int bytes_cached = fwrite(clientBuffer, 1, strlen(clientBuffer), cache_file);

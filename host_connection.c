@@ -48,7 +48,7 @@ int getChunkLen(int sockfd){
   return (int)strtol(rawLen, NULL, 16);
 }
 
-void checkResponse(char headers[], int * respValid){
+int checkResponse(char headers[]){
   char * resp;
   char * respEdit;
   int code;
@@ -58,10 +58,10 @@ void checkResponse(char headers[], int * respValid){
   printf("HTTP Server Response Code: %s\n", respEdit);
   code = (int)strtol(respEdit, NULL, 10);
   if (code != 200){
-    respValid = 0;
+    return 0;
   }
   else {
-    respValid = 1;
+    return 1;
   }
 }
 
@@ -86,13 +86,14 @@ int checkChunked(char headers[]){
 }
 
 // Processes response from server
-int getHostContent(int sockfd, char *cb, int CBUFLEN, int * respValid){
+int getHostContent(int sockfd, char *cb, int CBUFLEN){
 
 // Process header
 char header[MAXBUF] = { 0 };
 fillHeader(header, sockfd);
 
-checkResponse(header, respValid);
+int respValid;
+respValid = checkResponse(header);
 
 int chunkLen = 0;
 int chunkedFlag = checkChunked(header);
@@ -174,4 +175,6 @@ if (strlen(fullMessage) > CBUFLEN){
   strcpy(cb, fullMessage);
   free(fullMessage);
   close(sockfd);
+
+  return respValid;
 }

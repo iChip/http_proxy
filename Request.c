@@ -171,8 +171,9 @@ void* process_request(void* args)
       if ((rv = getaddrinfo(r->server_host, r->server_port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         freeaddrinfo(servinfo);
-        write(client_socket, e504, strlen(e504));
-        printf(e504);
+        printf(e500);
+        write(client_socket, e500, strlen(e500));
+        close(client_socket);
         continue;
       }
 
@@ -194,8 +195,8 @@ void* process_request(void* args)
       if (p == NULL) {
         fprintf(stderr, "client: failed to connect\n");
         freeaddrinfo(servinfo);
-        write(client_socket, e504, strlen(e504));
         printf(e504);
+        write(client_socket, e504, strlen(e504));
         close(client_socket);
         continue;
       }

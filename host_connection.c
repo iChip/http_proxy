@@ -48,9 +48,9 @@ int getChunkLen(int sockfd){
   return (int)strtol(rawLen, NULL, 16);
 }
 
-int checkResponse(char headers[]){
-  char * resp;
-  char * respEdit;
+int checkResponse(char* headers){
+  char* resp;
+  char respEdit[10];
   int code;
   resp = strstr(headers, " ");
   resp = resp+1;

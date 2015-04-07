@@ -6,7 +6,9 @@
 
 const char* DEFAULT_PORT = "80";
 const char* e403 = "403 - Forbidden";
+const char* e405 = "405 Method Not Allowed";
 const char* e500 = "500 - Internal Server Error";
+const char* e504 = "504 Gateway Timeout";
 const char* cat_expr_1 = "gsed -r -i 's_(.*<img src=\")([^\"]*)(.*)_\\1http://thecatapi.com/api/images/get\?format=src\\";
 const char* cat_expr_2 = "&type=jpg\\3_g' ";
 
@@ -110,10 +112,9 @@ void* process_request(void* args)
 
     /* If Not Get Request Return 404 */
     int valid;
-    char* invalid = "403 - Only allowed method is GET.\r\n\r\n";
     valid = strncmp(buf, get, 3);
     if ((valid = strncmp(buf, get, 3)) != 0){
-      write(client_socket,invalid,strlen(invalid));
+      write(client_socket, e405, strlen(e405));
       close(client_socket);
       continue;
     }
@@ -155,16 +156,6 @@ void* process_request(void* args)
     {
       /* Cache Miss */
 
-      /* Initialize cache_file */
-      char* temp_suffix = "_temp";
-      char temp_file_path[BUFLEN];
-      strcpy(temp_file_path, cache_file_path);
-      strcat(temp_file_path,temp_suffix);
-
-      /* Use Temporary Filename */
-      cache_file = fopen(temp_file_path,"w+");
-      if (!cache_file) perror("Error");
-
       /* Create a stream socket. */
       int sockfd, numbytes;
       char server_buf[BUFLEN];
@@ -180,7 +171,9 @@ void* process_request(void* args)
       if ((rv = getaddrinfo(r->server_host, r->server_port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         freeaddrinfo(servinfo);
-        return NULL;
+        write(client_socket, e504, strlen(e504));
+        printf(e504);
+        continue;
       }
 
       /* Open First New Socket to Requested HTTP Server */
@@ -201,9 +194,10 @@ void* process_request(void* args)
       if (p == NULL) {
         fprintf(stderr, "client: failed to connect\n");
         freeaddrinfo(servinfo);
-        write(client_socket, e500, strlen(e500));
+        write(client_socket, e504, strlen(e504));
+        printf(e504);
         close(client_socket);
-        return NULL;
+        continue;
       }
 
       inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
@@ -220,6 +214,25 @@ void* process_request(void* args)
 
       int respValid;
       respValid = getHostContent(sockfd, clientBuffer, CBUFLEN);
+
+      if (!respValid)
+      {
+        /* Write Response to Client (Without Caching) */
+        int cb_len = strlen(clientBuffer);
+        sendall(client_socket, clientBuffer, &cb_len);
+        close(client_socket);
+        continue;
+      }
+
+      /* Initialize cache_file */
+      char* temp_suffix = "_temp";
+      char temp_file_path[BUFLEN];
+      strcpy(temp_file_path, cache_file_path);
+      strcat(temp_file_path,temp_suffix);
+
+      /* Use Temporary Filename */
+      cache_file = fopen(temp_file_path,"w+");
+      if (!cache_file) perror("Error");
 
       /* Write Retrieved Content to Cache File */
       int bytes_cached = fwrite(clientBuffer, 1, strlen(clientBuffer), cache_file);
